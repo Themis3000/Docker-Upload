@@ -19,6 +19,7 @@ body {
     align-items: center;
     justify-content: center;
     color: #0383CA;
+    width: 100%
 }
 
 .center-content {
@@ -26,6 +27,7 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    width: 50%;
 }
 
 #drop {
@@ -34,6 +36,23 @@ body {
 
 #uploading {
     display: none;
+}
+
+#status-bar {
+    width: 75%;
+    height: 1.5em;
+    border: #0383CA solid 1px;
+    border-radius: 5px;
+}
+
+#status {
+    height: 100%;
+    width: 0;
+    background-color: #0383CA;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    transition: width .25s;
 }
 
 @keyframes eT1NXirqcaB2_to {

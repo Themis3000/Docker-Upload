@@ -64,6 +64,9 @@ function handleExit() {
 
 
 //handle uploading
+const statusDiv = document.getElementById("status")
+const centerUploading = document.getElementById("uploading")
+
 function createInput() {
     const input = document.createElement("input")
     input.setAttribute("type", "file")
@@ -78,6 +81,8 @@ function createInput() {
 }
 
 function submitInput(input) {
+    const access_key = window.prompt("Please input your access key:", "Access key")
+
     const data = new FormData()
 
     for (file of input.files) {
@@ -88,10 +93,21 @@ function submitInput(input) {
     xhr.open("POST", "/upload")
     xhr.upload.addEventListener("progress", (e) => {
         const percent = e.lengthComputable ? (e.loaded / e.total) * 100 : 0
-        console.log(percent.toFixed(2))
+        statusDiv.style.width = `${percent}%`
+        statusDiv.innerHTML = `${percent.toFixed(1)}%`
+
+        if (percent === 100) {
+            window.alert("Upload complete")
+            centerDrop.style.display = "flex"
+            centerUploading.style.display = "none"
+        }
     })
 
+    xhr.setRequestHeader("key", access_key)
     xhr.send(data)
+
+    centerDrop.style.display = "none"
+    centerUploading.style.display = "flex"
 }
 
 centerDrop.addEventListener("click", () => {
