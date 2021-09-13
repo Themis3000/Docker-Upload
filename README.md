@@ -3,5 +3,4 @@ This project intends to provide an easy way to allow people to upload files to y
 
 ## Progress
 This project is not yet complete. Here's a list of the things that still need work:
-- Password input/checking
 - Creation of docker image
