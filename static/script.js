@@ -81,7 +81,7 @@ function createInput() {
 }
 
 function submitInput(input) {
-    const access_key = window.prompt("Please input your access key:", "Access key")
+    const access_key = window.prompt("Please input your access key:", "")
 
     const data = new FormData()
 
@@ -98,14 +98,29 @@ function submitInput(input) {
 
         if (percent === 100) {
             window.alert("Upload complete")
-            centerDrop.style.display = "flex"
-            centerUploading.style.display = "none"
+            showHome()
+            statusDiv.style.width = "0"
+            statusDiv.innerHTML = ""
         }
     })
+
+    xhr.onerror = () => {
+        window.alert("Failed upload. Make sure your access key is correct.")
+        showHome()
+    }
 
     xhr.setRequestHeader("key", access_key)
     xhr.send(data)
 
+    showUpload()
+}
+
+function showHome() {
+    centerDrop.style.display = "flex"
+    centerUploading.style.display = "none"
+}
+
+function showUpload() {
     centerDrop.style.display = "none"
     centerUploading.style.display = "flex"
 }
