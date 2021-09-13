@@ -18,9 +18,9 @@ def index_page():
 
 @app.route("/upload", methods=["post"])
 def upload_endpoint():
-    session = randint(0, 100000)
+    session = randint(0, 9999999)
     session_path = os.path.join(UPLOADS_DIR, str(session))
-    os.mkdir(session_path)
+    os.makedirs(session_path)
 
     for name, file in request.files.items():
         file_name = secure_filename(name)
