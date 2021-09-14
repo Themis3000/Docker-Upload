@@ -1,3 +1,4 @@
+from posixpath import relpath
 from flask import Flask, request
 from werkzeug.utils import secure_filename
 import os
@@ -26,9 +27,14 @@ def upload_endpoint():
     os.makedirs(session_path)
 
     for name, file in request.files.items():
-        file_name = secure_filename(name)
-        file.save(os.path.join(session_path, file_name))
+        dir_rel_path = file.filename.rsplit("/", 1)[0]
+        dir_path = os.path.join(session_path, dir_rel_path)
+        if not os.path.isdir(dir_path):
+            os.makedirs(dir_path)
+
+        file.save(os.path.join(dir_path, secure_filename(name)))
         file.close()
+    
     return "Success", 200
 
 

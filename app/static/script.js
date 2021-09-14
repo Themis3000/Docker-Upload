@@ -59,7 +59,7 @@ function handleExit() {
             stopped = true
             reverseAnimation()
         }
-    }, 10)
+    }, 200)
 }
 
 
@@ -67,25 +67,12 @@ function handleExit() {
 const statusDiv = document.getElementById("status")
 const centerUploading = document.getElementById("uploading")
 
-function createInput() {
-    const input = document.createElement("input")
-    input.setAttribute("type", "file")
-    input.setAttribute("multiple", "true")
-    input.setAttribute("name", "file")
-
-    input.addEventListener("change", () => {
-        submitInput(input)
-    }, false)
-
-    return input
-}
-
-function submitInput(input) {
+function submitFiles(files) {
     const access_key = window.prompt("Please input your access key:", "")
 
     const data = new FormData()
 
-    for (file of input.files) {
+    for (file of files) {
         data.append(file.name, file)
     }
 
@@ -115,6 +102,57 @@ function submitInput(input) {
     showUpload()
 }
 
+
+async function getAllFileEntries(dataTransferItemList) {
+    let fileEntries = []
+    // Use BFS to traverse entire directory/file structure
+    let queue = []
+    // Unfortunately dataTransferItemList is not iterable i.e. no forEach
+    for (let i = 0; i < dataTransferItemList.length; i++) {
+        queue.push(dataTransferItemList[i].webkitGetAsEntry())
+    }
+    while (queue.length > 0) {
+        let entry = queue.shift()
+        if (entry.isFile) {
+            fileEntries.push(entry)
+        } else if (entry.isDirectory) {
+            queue.push(...await readAllDirectoryEntries(entry.createReader()))
+        }
+    }
+    return fileEntries
+}
+  
+// Get all the entries (files or sub-directories) in a directory 
+// by calling readEntries until it returns empty array
+async function readAllDirectoryEntries(directoryReader) {
+    let entries = []
+    let readEntries = await readEntriesPromise(directoryReader)
+    while (readEntries.length > 0) {
+        entries.push(...readEntries)
+        readEntries = await readEntriesPromise(directoryReader)
+    }
+    return entries
+}
+  
+// Wrap readEntries in a promise to make working with readEntries easier
+// readEntries will return only some of the entries in a directory
+// e.g. Chrome returns at most 100 entries at a time
+async function readEntriesPromise(directoryReader) {
+    try {
+        return await new Promise((resolve, reject) => {
+            directoryReader.readEntries(resolve, reject)
+        })
+    } catch (err) {
+        console.log(err)
+    }
+}
+
+async function toFilePromise(fileEntry) {
+    return new Promise((resolve) => {
+        fileEntry.file(resolve)
+    })
+}
+
 function showHome() {
     centerDrop.style.display = "flex"
     centerUploading.style.display = "none"
@@ -126,13 +164,28 @@ function showUpload() {
 }
 
 centerDrop.addEventListener("click", () => {
-    const input = createInput()
+    const input = document.createElement("input")
+    input.setAttribute("type", "file")
+    input.setAttribute("multiple", "true")
+    input.setAttribute("name", "file")
+
+    input.addEventListener("change", () => {
+        submitFiles(input.files)
+        input.remove()
+    }, false)
+
     input.click()
     return false
 }, false)
 
-dropArea.addEventListener("drop", (e) => {
-    const input = createInput()
-    input.files = e.dataTransfer.files
-    submitInput(input)
+dropArea.addEventListener("drop", async (e) => {
+    let files = []
+    let items = await getAllFileEntries(e.dataTransfer.items)
+
+    for (const item of items) {
+        file = await toFilePromise(item)
+        files.push(file)
+    }
+
+    submitFiles(files)
 }, false)
