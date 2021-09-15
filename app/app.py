@@ -5,6 +5,7 @@ import os
 from random import randint
 
 app = Flask(__name__)
+app.config['MAX_CONTENT_LENGTH'] = 500 * (1024 * 1024 * 1024)  # First number specifies in gb
 
 APP_ROUTE = os.path.dirname(os.path.abspath(__file__))
 UPLOADS_DIR = os.path.join(APP_ROUTE, "uploads")
